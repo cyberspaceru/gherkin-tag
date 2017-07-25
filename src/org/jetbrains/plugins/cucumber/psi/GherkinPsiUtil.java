@@ -36,8 +36,9 @@ public class GherkinPsiUtil {
                                                      @NotNull AbstractStepDefinition definition,
                                                      final int shiftOffset) {
     final List<TextRange> parameterRanges = new ArrayList<>();
-    final Pattern pattern = definition.getPattern();
-    if (pattern == null) return null;
+    final Pattern pattern = definition.getPattern(((GherkinFile) step.getContainingFile()).getLocaleLanguage());
+    if (pattern == null)
+      return null;
     final Perl5Matcher matcher = new Perl5Matcher();
     if (matcher.contains(step.getStepName(), pattern)) {
       final MatchResult match = matcher.getMatch();
