@@ -3,7 +3,7 @@
     <name>Gherkin for TAG</name>
     <description>
         Provides support of Gherkin language for page-factory (https://github.com/sbtqa/page-factory)
-        Authors:
+        Authors of adaptation:
             Tatsiy Ilya, cyberspaceroot@gmail.com
             Kasyanenko Constantin, todo
             Artem Sokovets, todo
