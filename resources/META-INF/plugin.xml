@@ -1,7 +1,13 @@
 <idea-plugin>
     <id>gherkin</id>
     <name>Gherkin for TAG</name>
-    <description>Provides support of Gherkin language</description>
+    <description>
+        Provides support of Gherkin language for page-factory (https://github.com/sbtqa/page-factory)
+        Authors:
+            Tatsiy Ilya, cyberspaceroot@gmail.com
+            Kasyanenko Constantin, todo
+            Artem Sokovets, todo
+    </description>
     <version>100.000</version>
     <depends>com.intellij.modules.xml</depends>
     <idea-version since-build="136.0"/>
