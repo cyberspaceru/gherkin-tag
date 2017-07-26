@@ -3,11 +3,11 @@
     <name>Gherkin for TAG</name>
     <description>
         <![CDATA[
-        Provides support of Gherkin language for <a href="https://github.com/sbtqa/page-factory">page-factory</a>.<br/><br/>
+        Provides support of Gherkin language for <a href="https://github.com/sbtqa/page-factory">page-factory</a>, <a href="https://github.com/sbtqa/api-factory">api-factory</a>.<br/><br/>
         Authors of adaptation:<br/>
             Tatsiy Ilya, cyberspaceroot@gmail.com<br/>
             Kasyanenko Constantin, todo<br/>
-            Artem Sokovets, todo<br/>
+            Artem Sokovets, relix@mail.ru<br/>
         <br/>
         Source: https://github.com/cyberspaceru/gherkin-tag<br/>
         Cucumber: https://github.com/JetBrains/intellij-plugins/tree/master/cucumber
