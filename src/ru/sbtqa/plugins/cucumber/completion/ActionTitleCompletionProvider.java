@@ -9,7 +9,6 @@ import com.intellij.openapi.util.TextRange;
 import com.intellij.psi.JavaPsiFacade;
 import com.intellij.psi.PsiConstantEvaluationHelper;
 import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiFile;
 import com.intellij.util.ProcessingContext;
 import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
@@ -17,6 +16,7 @@ import org.jetbrains.plugins.cucumber.completion.CucumberCompletionContributor;
 import org.jetbrains.plugins.cucumber.psi.impl.GherkinFileImpl;
 import org.jetbrains.plugins.cucumber.psi.impl.GherkinStepImpl;
 import org.jetbrains.plugins.cucumber.referencesearch.CucumberJavaUtil;
+import ru.sbtqa.plugins.cucumber.util.TAGContext;
 import ru.sbtqa.plugins.cucumber.util.TAGProject;
 
 import java.util.*;
@@ -37,17 +37,20 @@ public class ActionTitleCompletionProvider extends CompletionProvider<Completion
 
     @Override
     protected void addCompletions(@NotNull CompletionParameters parameters, ProcessingContext context, @NotNull CompletionResultSet resultSet) {
-        PsiElement element = parameters.getPosition().getContext();
-        PsiFile file = parameters.getPosition().getContainingFile();
-        String stepName = element instanceof GherkinStepImpl ? ((GherkinStepImpl) element).getStepName() : null;
-        String localLanguage = file instanceof GherkinFileImpl ? ((GherkinFileImpl) file).getLocaleLanguage() : null;
+        if (!(parameters.getPosition().getContext() instanceof GherkinStepImpl))
+            return;
+        GherkinStepImpl element = (GherkinStepImpl) parameters.getPosition().getContext();
+        GherkinFileImpl file = (GherkinFileImpl) parameters.getPosition().getContainingFile();
+        String stepName = element.getStepName();
+        String localLanguage = file.getLocaleLanguage();
 
+        TAGContext tagContext = new TAGContext(element);
         String[] starts = null;
         if (localLanguage != null && ("en".equals(localLanguage) || "ru".equals(localLanguage)))
             starts = "en".equals(localLanguage) ? ENGLISH_KEYWORDS : RUSSIAN_KEYWORDS;
 
         if (stepName != null && starts != null && stepName.matches("(" + StringUtils.join(starts, "|") + ").*")) {
-            getVariations(element.getProject(), starts)
+            getVariations(element.getProject(), starts, tagContext.getCurrentPageName())
                     .filter(Objects::nonNull)
                     .forEach(x -> addActionTitle(x.replace("\\(", "("), resultSet));
             resultSet.stopHere();
@@ -62,10 +65,11 @@ public class ActionTitleCompletionProvider extends CompletionProvider<Completion
         resultSet.addElement(LookupElementBuilder.create(step).withInsertHandler(new CucumberCompletionContributor.StepInsertHandler(ranges)));
     }
 
-    private Stream<String> getVariations(Project project, String[] starts) {
+    private Stream<String> getVariations(Project project, String[] starts, String pageName) {
         List<String> result = new ArrayList<>();
         final PsiConstantEvaluationHelper evaluationHelper = JavaPsiFacade.getInstance(project).getConstantEvaluationHelper();
         TAGProject.pages(project)
+                .filter(x -> pageName.equals(TAGProject.findPageName(x, project)))
                 .map(TAGProject::actionTitle)
                 .forEach(x ->
                         x.forEach(pair -> { // Каждая аннотация ActionTitle

@@ -16,6 +16,8 @@ import com.intellij.psi.impl.source.tree.Factory;
 import com.intellij.psi.impl.source.tree.LeafElement;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.util.PsiTreeUtil;
+import cucumber.runtime.snippets.CamelCaseConcatenator;
+import cucumber.runtime.snippets.FunctionNameGenerator;
 import cucumber.runtime.snippets.SnippetGenerator;
 import gherkin.formatter.model.Step;
 import org.jetbrains.annotations.NotNull;
@@ -150,7 +152,7 @@ public class Java8StepDefinitionCreator extends JavaStepDefinitionCreator {
     final SnippetGenerator generator = new SnippetGenerator(new Java8Snippet());
 
     // заменил
-    final String snippet = generator.getSnippet(cucumberStep);
+    final String snippet = generator.getSnippet(cucumberStep,  new FunctionNameGenerator(new CamelCaseConcatenator()));
 //    final String snippet = generator.getSnippet(cucumberStep, new FunctionNameGenerator(new CamelCaseConcatenator()))
 //      .replace("PendingException", CucumberJavaUtil.getCucumberPendingExceptionFqn(step))
 //      .replaceAll("\\\\\\\\", "\\\\")
