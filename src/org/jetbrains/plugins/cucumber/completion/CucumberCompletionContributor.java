@@ -27,7 +27,7 @@ import org.jetbrains.plugins.cucumber.psi.impl.GherkinExamplesBlockImpl;
 import org.jetbrains.plugins.cucumber.psi.impl.GherkinScenarioOutlineImpl;
 import org.jetbrains.plugins.cucumber.steps.AbstractStepDefinition;
 import org.jetbrains.plugins.cucumber.steps.CucumberStepsIndex;
-import ru.sbtqa.plugins.cucumber.util.Features;
+import ru.sbtqa.plugins.cucumber.util.TagSteps;
 
 import java.util.*;
 import java.util.regex.Matcher;
@@ -221,7 +221,7 @@ public class CucumberCompletionContributor extends CompletionContributor {
             String text = definition.getCucumberRegex();
             String language = file instanceof GherkinFile ? ((GherkinFile) file).getLocaleLanguage() : null;
             // вставил автодополнение
-            text = Features.find(language, text);
+            text = TagSteps.find(language, text);
             if (text == null)
                 text = definition.getCucumberRegex();
             if (text != null) {

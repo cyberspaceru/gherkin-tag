@@ -15,7 +15,7 @@ import org.jetbrains.annotations.Nullable;
 import org.jetbrains.plugins.cucumber.CucumberUtil;
 import org.jetbrains.plugins.cucumber.psi.GherkinStep;
 import org.jetbrains.plugins.cucumber.psi.impl.GherkinFileImpl;
-import ru.sbtqa.plugins.cucumber.util.Features;
+import ru.sbtqa.plugins.cucumber.util.TagSteps;
 
 import java.util.*;
 
@@ -65,20 +65,28 @@ public abstract class AbstractStepDefinition {
      */
     @Nullable
     public Pattern getPattern(String language) {
-        String cucumberRegex = Features.find(language, getCucumberRegex());
+        if (getCucumberRegex() == null)
+            return null;
+        String cucumberRegex = TagSteps.find(language, getCucumberRegex());
         if (cucumberRegex == null)
             cucumberRegex = getCucumberRegex();
+        if (myRegexText == null || !myRegexText.equals(cucumberRegex)) {
+            myRegex = createPattern(cucumberRegex);
+            myRegexText = cucumberRegex;
+        }
+        return myRegex;
+    }
+
+    public static Pattern createPattern(String regex) {
+        if (regex == null)
+            return null;
         try {
-            if (myRegexText == null || !myRegexText.equals(cucumberRegex)) {
-                final StringBuilder patternText = new StringBuilder(ESCAPE_PATTERN.matcher(cucumberRegex).replaceAll("(.*)"));
-                if (patternText.toString().startsWith(CUCUMBER_START_PREFIX))
-                    patternText.replace(0, CUCUMBER_START_PREFIX.length(), "^");
-                if (patternText.toString().endsWith(CUCUMBER_END_SUFFIX))
-                    patternText.replace(patternText.length() - CUCUMBER_END_SUFFIX.length(), patternText.length(), "$");
-                myRegex = new Perl5Compiler().compile(patternText.toString(), Perl5Compiler.CASE_INSENSITIVE_MASK);
-                myRegexText = cucumberRegex;
-            }
-            return myRegex;
+            final StringBuilder patternText = new StringBuilder(ESCAPE_PATTERN.matcher(regex).replaceAll("(.*)"));
+            if (patternText.toString().startsWith(CUCUMBER_START_PREFIX))
+                patternText.replace(0, CUCUMBER_START_PREFIX.length(), "^");
+            if (patternText.toString().endsWith(CUCUMBER_END_SUFFIX))
+                patternText.replace(patternText.length() - CUCUMBER_END_SUFFIX.length(), patternText.length(), "$");
+            return new Perl5Compiler().compile(patternText.toString(), Perl5Compiler.CASE_INSENSITIVE_MASK);
         } catch (final MalformedPatternException ignored) {
             return null;
         }
@@ -135,6 +143,7 @@ public abstract class AbstractStepDefinition {
     public boolean supportsRename(@Nullable final String newName) {
         return true;
     }
+
 
     /**
      * Finds all steps points to this definition in some scope

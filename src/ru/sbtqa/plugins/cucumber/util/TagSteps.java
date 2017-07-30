@@ -10,7 +10,7 @@ import java.util.function.Predicate;
  * Created by Kasyanenko Konstantin
  * 27.06.2017
  */
-public class Features {
+public class TagSteps {
 
     public static final String USER_ACTION_IN_BLOCK_NO_PARAMS = "ru.sbtqa.tag.pagefactory.userActionInBlockNoParams";
     public static final String USER_ACTION_IN_BLOCK_TABLE_PARAM = "ru.sbtqa.tag.pagefactory.userActionInBlockTableParam";
@@ -37,6 +37,8 @@ public class Features {
     public static final String SWIPE_TO_TEXT = "ru.sbtqa.tag.pagefactory.swipeToText";
 
     private static Map<String, Map<String, String>> languageMap;
+
+    public static List<String> ACTIONS = new ArrayList<>();
 
     static {
         languageMap = new HashMap<>();
@@ -91,9 +93,17 @@ public class Features {
         ru.put(SWIPE_TO_TEXT, "^пользователь свайпает экран \\\"([^\\\"]*)\\\" до текста \\\"([^\\\"]*)\\\"$");
         languageMap.put("en", en);
         languageMap.put("ru", ru);
+
+        ACTIONS.addAll(Arrays.asList(USER_ACTION_NO_PARAMS,
+                USER_ACTION_ONE_PARAM,
+                USER_ACTION_TWO_PARAMS,
+                USER_ACTION_THREE_PARAMS,
+                USER_ACTION_TABLE_PARAM,
+                USER_DO_ACTION_WITH_OBJECT,
+                USER_ACTION_LIST_PARAM));
     }
 
-    private Features() {}
+    private TagSteps() {}
 
     @Nullable
     public static String find(String language, String simpleName) {

@@ -14,11 +14,12 @@ import java.util.stream.Stream;
 /**
  * Created by cyberspace on 7/19/2017.
  */
-public class TAGProject {
+public class TagProject {
 
-    private static final String ACTION_TITLE_ANNOTATION_QUALIFIED_NAME = "ru.sbtqa.tag.pagefactory.annotations.ActionTitle";
-    private static final String PAGE_ENTRY_ANNOTATION_QUALIFIED_NAME = "ru.sbtqa.tag.pagefactory.annotations.PageEntry";
-    private static final String TAG_PAGE_QUALIFIED_NAME = "ru.sbtqa.tag.pagefactory.Page";
+    public static final String ACTION_TITLE_ANNOTATION_QUALIFIED_NAME = "ru.sbtqa.tag.pagefactory.annotations.ActionTitle";
+    public static final String ACTION_TITLES_ANNOTATION_QUALIFIED_NAME = "ru.sbtqa.tag.pagefactory.annotations.ActionTitles";
+    public static final String PAGE_ENTRY_ANNOTATION_QUALIFIED_NAME = "ru.sbtqa.tag.pagefactory.annotations.PageEntry";
+    public static final String TAG_PAGE_QUALIFIED_NAME = "ru.sbtqa.tag.pagefactory.Page";
 
     /**
      * Найти все аннотации ActionTitle класса наследуемого от ru.sbtqa.tag.pagefactory.Page.
@@ -39,6 +40,33 @@ public class TAGProject {
                 .filter(x -> x.getFirst() != null && ACTION_TITLE_ANNOTATION_QUALIFIED_NAME.equals(x.getFirst().getQualifiedName()))
                 .map(x -> new Pair<>(x.getFirst(), x.getSecond().getParameterList().getParameters().length))
                 .unordered();
+    }
+
+    /**
+     * Опредялеят если в классе метод, который содержит заданный actionTitle
+     */
+    public static PsiMethod containsActionTitle(PsiClass clazz, String actionTitle, Project project) {
+        List<PsiMethod> methods = Arrays.asList(clazz.getAllMethods());
+        final PsiConstantEvaluationHelper evaluationHelper = JavaPsiFacade.getInstance(project).getConstantEvaluationHelper();
+        for (PsiMethod method : methods) {
+            List<PsiAnnotation> psiAnnotations = Optional.of(method.getModifierList()).map(PsiAnnotationOwner::getAnnotations).map(Arrays::asList).orElse(null);
+            if (psiAnnotations != null) {
+                PsiAnnotation actionTileAnnotation = psiAnnotations.stream()
+                        .filter(x -> TagProject.ACTION_TITLE_ANNOTATION_QUALIFIED_NAME.equals(x.getQualifiedName()))
+                        .findFirst()
+                        .orElse(null);
+                String actionTitleOfAnnotation = Optional.ofNullable(actionTileAnnotation)
+                        .map(CucumberJavaUtil::getAnnotationValue)
+                        .map(y -> evaluationHelper.computeConstantExpression(y, false))
+                        .map(Object::toString)
+                        .filter(y -> y.length() > 1)
+                        .orElse(null);
+                if (actionTitle.equals(actionTitleOfAnnotation)) {
+                    return method;
+                }
+            }
+        }
+        return null;
     }
 
     /**
@@ -84,7 +112,7 @@ public class TAGProject {
                 classes::add
         );
         return classes.stream()
-                .filter(TAGProject::isTAGPage)
+                .filter(TagProject::isTAGPage)
                 .unordered();
     }
 

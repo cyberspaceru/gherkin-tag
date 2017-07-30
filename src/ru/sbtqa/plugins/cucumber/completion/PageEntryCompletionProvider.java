@@ -8,12 +8,10 @@ import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.util.ProcessingContext;
-import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.plugins.cucumber.completion.CucumberCompletionContributor;
 import org.jetbrains.plugins.cucumber.psi.impl.GherkinFileImpl;
 import org.jetbrains.plugins.cucumber.psi.impl.GherkinStepImpl;
-import ru.sbtqa.plugins.cucumber.util.TAGProject;
+import ru.sbtqa.plugins.cucumber.util.TagProject;
 
 /**
  * Created by SBT-Tatciy-IO on 19.07.2017.
@@ -38,8 +36,8 @@ public class PageEntryCompletionProvider extends CompletionProvider<CompletionPa
 
         if (startWith != null && pattern != null && startWith.matches(pattern)) {
             final Project project = element.getProject();
-            TAGProject.pages(project)
-                    .forEach(x -> resultSet.addElement(LookupElementBuilder.create(startWith + TAGProject.findPageName(x, project) + "\"")));
+            TagProject.pages(project)
+                    .forEach(x -> resultSet.addElement(LookupElementBuilder.create(startWith + TagProject.findPageName(x, project) + "\"")));
             resultSet.stopHere();
         }
     }

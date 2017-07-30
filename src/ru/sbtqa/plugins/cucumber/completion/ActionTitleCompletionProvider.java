@@ -16,8 +16,8 @@ import org.jetbrains.plugins.cucumber.completion.CucumberCompletionContributor;
 import org.jetbrains.plugins.cucumber.psi.impl.GherkinFileImpl;
 import org.jetbrains.plugins.cucumber.psi.impl.GherkinStepImpl;
 import org.jetbrains.plugins.cucumber.referencesearch.CucumberJavaUtil;
-import ru.sbtqa.plugins.cucumber.util.TAGContext;
-import ru.sbtqa.plugins.cucumber.util.TAGProject;
+import ru.sbtqa.plugins.cucumber.util.TagContext;
+import ru.sbtqa.plugins.cucumber.util.TagProject;
 
 import java.util.*;
 import java.util.regex.Matcher;
@@ -44,7 +44,7 @@ public class ActionTitleCompletionProvider extends CompletionProvider<Completion
         String stepName = element.getStepName();
         String localLanguage = file.getLocaleLanguage();
 
-        TAGContext tagContext = new TAGContext(element);
+        TagContext tagContext = new TagContext(element);
         String[] starts = null;
         if (localLanguage != null && ("en".equals(localLanguage) || "ru".equals(localLanguage)))
             starts = "en".equals(localLanguage) ? ENGLISH_KEYWORDS : RUSSIAN_KEYWORDS;
@@ -68,18 +68,16 @@ public class ActionTitleCompletionProvider extends CompletionProvider<Completion
     private Stream<String> getVariations(Project project, String[] starts, String pageName) {
         List<String> result = new ArrayList<>();
         final PsiConstantEvaluationHelper evaluationHelper = JavaPsiFacade.getInstance(project).getConstantEvaluationHelper();
-        TAGProject.pages(project)
-                .filter(x -> pageName.equals(TAGProject.findPageName(x, project)))
-                .map(TAGProject::actionTitle)
+        TagProject.pages(project)
+                .filter(x -> pageName.equals(TagProject.findPageName(x, project)))
+                .map(TagProject::actionTitle)
                 .forEach(x ->
                         x.forEach(pair -> { // Каждая аннотация ActionTitle
-                            final PsiElement annotationValue = CucumberJavaUtil.getAnnotationValue(pair.getFirst());
-                            final Integer paramsNumber = pair.getSecond();
-                            Optional.ofNullable(annotationValue)
+                            Optional.ofNullable(CucumberJavaUtil.getAnnotationValue(pair.getFirst()))
                                     .map(y -> evaluationHelper.computeConstantExpression(y, false))
                                     .map(Object::toString)
                                     .filter(y -> y.length() > 1)
-                                    .ifPresent(y -> Arrays.stream(starts).forEach(z -> result.add(z + y + ")" + StringUtils.repeat(" " + PATTERN_FOR_INSERTION, paramsNumber))));
+                                    .ifPresent(y -> Arrays.stream(starts).forEach(z -> result.add(z + y + ")" + StringUtils.repeat(" " + PATTERN_FOR_INSERTION, pair.getSecond()))));
                         })
                 );
         return result.stream();
