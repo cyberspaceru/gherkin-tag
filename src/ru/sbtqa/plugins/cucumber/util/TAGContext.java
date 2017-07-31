@@ -25,7 +25,6 @@ public class TagContext {
     }
 
     public String getCurrentActionTitle() {
-        String result = "";
         PsiElement prevElement = gherkinStep;
         String language = ((GherkinFileImpl) gherkinFile.getContainingFile()).getLocaleLanguage();
         do {
@@ -36,16 +35,14 @@ public class TagContext {
                         org.apache.oro.text.regex.Pattern pattern = AbstractStepDefinition.createPattern(TagSteps.find(language, action));
                         if (pattern != null && new Perl5Matcher().contains(step, pattern)) {
                             Matcher m = BRACKETS_VALUE_EXTRACTOR_PATTERN.matcher(step);
-                            if (m.find()) {
-                                result = m.group().replaceAll("\\(", "").replaceAll("\\)", "");
-                                break;
-                            }
+                            if (m.find())
+                                return m.group().replaceAll("\\(", "").replaceAll("\\)", "");
                         }
                     }
                 }
             }
         } while ((prevElement = prevElement.getPrevSibling()) != null);
-        return result;
+        return "";
     }
 
     public String getCurrentPageName() {

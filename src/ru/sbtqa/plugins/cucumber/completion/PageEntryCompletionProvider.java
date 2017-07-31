@@ -13,6 +13,8 @@ import org.jetbrains.plugins.cucumber.psi.impl.GherkinFileImpl;
 import org.jetbrains.plugins.cucumber.psi.impl.GherkinStepImpl;
 import ru.sbtqa.plugins.cucumber.util.TagProject;
 
+import java.util.Objects;
+
 /**
  * Created by SBT-Tatciy-IO on 19.07.2017.
  */
@@ -37,7 +39,10 @@ public class PageEntryCompletionProvider extends CompletionProvider<CompletionPa
         if (startWith != null && pattern != null && startWith.matches(pattern)) {
             final Project project = element.getProject();
             TagProject.pages(project)
-                    .forEach(x -> resultSet.addElement(LookupElementBuilder.create(startWith + TagProject.findPageName(x, project) + "\"")));
+                    .filter(Objects::nonNull)
+                    .map(x -> TagProject.findPageName(x, project))
+                    .filter(Objects::nonNull)
+                    .forEach(x -> resultSet.addElement(LookupElementBuilder.create(startWith + x + "\"")));
             resultSet.stopHere();
         }
     }

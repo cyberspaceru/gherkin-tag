@@ -38,7 +38,7 @@ public class TagSteps {
 
     private static Map<String, Map<String, String>> languageMap;
 
-    public static List<String> ACTIONS = new ArrayList<>();
+    public static final List<String> ACTIONS = new ArrayList<>();
 
     static {
         languageMap = new HashMap<>();
