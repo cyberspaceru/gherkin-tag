@@ -38,7 +38,7 @@ public class TagSteps {
 
     private static Map<String, Map<String, String>> languageMap;
 
-    public static final List<String> ACTIONS = new ArrayList<>();
+    public static final List<String> ACTION_STEP_NAMES = new ArrayList<>();
 
     static {
         languageMap = new HashMap<>();
@@ -51,7 +51,7 @@ public class TagSteps {
         en.put(FIND_ELEMENTS_IN_BLOCK, "^user in block \\\"([^\\\"]*)\\\" finds (?:element|textinput|checkbox|radiobutton|table|header|button|link|image) \\\"([^\\\"]*)\\\"$");
         en.put(FIND_ELEMENTS_IN_LIST, "^user in list \\\"([^\\\"]*)\\\" finds the value element \\\"([^\\\"]*)\\\"$");
         en.put(OPEN_PAGE, "^(?:user |he |)(?:is on the page|page is being opened|master tab is being opened) \\\"(.*)\\\"$");
-        en.put(USER_ACTION_NO_PARAMS, "^user \\((.*)\\)$");
+        en.put(USER_ACTION_NO_PARAMS, "^(?:user) \\((.*)\\)$");
         en.put(USER_ACTION_ONE_PARAM, "^user \\((.*)\\) (?:with param |)\\\"([^\\\"]*)\\\"$");
         en.put(USER_ACTION_TWO_PARAMS, "^user \\((.*)\\) (?:with the parameters |)\\\"([^\\\"]*)\\\" \\\"([^\\\"]*)\\\"$");
         en.put(USER_ACTION_THREE_PARAMS, "^user \\((.*)\\) (?:with the parameters |)\\\"([^\\\"]*)\\\" \\\"([^\\\"]*)\\\" \\\"([^\\\"]*)\\\"$");
@@ -94,7 +94,7 @@ public class TagSteps {
         languageMap.put("en", en);
         languageMap.put("ru", ru);
 
-        ACTIONS.addAll(Arrays.asList(USER_ACTION_NO_PARAMS,
+        ACTION_STEP_NAMES.addAll(Arrays.asList(USER_ACTION_NO_PARAMS,
                 USER_ACTION_ONE_PARAM,
                 USER_ACTION_TWO_PARAMS,
                 USER_ACTION_THREE_PARAMS,

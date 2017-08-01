@@ -16,10 +16,15 @@ import java.util.stream.Stream;
  */
 public class TagProject {
 
+    public static final String RU_LANGUAGE = "ru";
+    public static final String EN_LANGUAGE = "en";
+
     public static final String ACTION_TITLE_ANNOTATION_QUALIFIED_NAME = "ru.sbtqa.tag.pagefactory.annotations.ActionTitle";
     public static final String ACTION_TITLES_ANNOTATION_QUALIFIED_NAME = "ru.sbtqa.tag.pagefactory.annotations.ActionTitles";
     public static final String PAGE_ENTRY_ANNOTATION_QUALIFIED_NAME = "ru.sbtqa.tag.pagefactory.annotations.PageEntry";
     public static final String TAG_PAGE_QUALIFIED_NAME = "ru.sbtqa.tag.pagefactory.Page";
+
+    private TagProject() {}
 
     /**
      * Найти все аннотации ActionTitle класса наследуемого от ru.sbtqa.tag.pagefactory.Page.
@@ -31,10 +36,9 @@ public class TagProject {
         List<Pair<PsiAnnotation, PsiMethod>> allAnnotations = new ArrayList<>();
         Arrays.stream(page.getAllMethods())
                 .filter(x -> x.getContainingClass() != null &&
-                        x.getContainingClass().getQualifiedName() != null &&
-                        !TAG_PAGE_QUALIFIED_NAME.equals(x.getContainingClass().getQualifiedName())) // игнорируем экшины из родителя
+                        x.getContainingClass().getQualifiedName() != null) // игнорируем экшины из родителя
                 .forEach(x -> Arrays.stream(x.getModifierList().getAnnotations())
-                            .forEach(y -> allAnnotations.add(new Pair<>(y, x))));
+                        .forEach(y -> allAnnotations.add(new Pair<>(y, x))));
 
         return allAnnotations.stream()
                 .filter(x -> x.getFirst() != null && ACTION_TITLE_ANNOTATION_QUALIFIED_NAME.equals(x.getFirst().getQualifiedName()))
@@ -45,8 +49,12 @@ public class TagProject {
     /**
      * Опредялеят если в классе метод, который содержит заданный actionTitle
      */
-    public static PsiMethod containsActionTitle(PsiClass clazz, String actionTitle, Project project) {
-        List<PsiMethod> methods = Arrays.asList(clazz.getAllMethods());
+    public static PsiMethod containsActionTitle(PsiClass psiClass, String actionTitle, Project project) {
+        List<PsiMethod> methods = new ArrayList<>();
+        while (psiClass != null) {
+            methods.addAll(Arrays.asList(psiClass.getAllMethods()));
+            psiClass = psiClass.getSuperClass();
+        }
         final PsiConstantEvaluationHelper evaluationHelper = JavaPsiFacade.getInstance(project).getConstantEvaluationHelper();
         for (PsiMethod method : methods) {
             List<PsiAnnotation> psiAnnotations = Optional.of(method.getModifierList()).map(PsiAnnotationOwner::getAnnotations).map(Arrays::asList).orElse(null);

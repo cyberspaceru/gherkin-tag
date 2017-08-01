@@ -14,10 +14,10 @@ import java.util.regex.Pattern;
  */
 public class TagContext {
 
-    private final GherkinFileImpl gherkinFile;
-    private final GherkinStepImpl gherkinStep;
     private final static Pattern QUOTES_VALUE_EXTRACTOR_PATTERN = Pattern.compile("\"([^\"]*)\"");
     private final static Pattern BRACKETS_VALUE_EXTRACTOR_PATTERN = Pattern.compile("\\((.*?)\\)");
+    private final GherkinFileImpl gherkinFile;
+    private final GherkinStepImpl gherkinStep;
 
     public TagContext(GherkinStepImpl step) {
         this.gherkinStep = step;
@@ -31,7 +31,7 @@ public class TagContext {
             if (prevElement instanceof GherkinStepImpl) {
                 String step = ((GherkinStepImpl)prevElement).getStepName();
                 if (step != null) {
-                    for (String action : TagSteps.ACTIONS) {
+                    for (String action : TagSteps.ACTION_STEP_NAMES) {
                         org.apache.oro.text.regex.Pattern pattern = AbstractStepDefinition.createPattern(TagSteps.find(language, action));
                         if (pattern != null && new Perl5Matcher().contains(step, pattern)) {
                             Matcher m = BRACKETS_VALUE_EXTRACTOR_PATTERN.matcher(step);

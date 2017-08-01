@@ -278,7 +278,7 @@ public class GherkinStepImpl extends GherkinPsiElementBase implements GherkinSte
         String step = getStepName();
         if (step != null) {
             String language = ((GherkinFileImpl) getContainingFile()).getLocaleLanguage();
-            for (String action : TagSteps.ACTIONS) {
+            for (String action : TagSteps.ACTION_STEP_NAMES) {
                 org.apache.oro.text.regex.Pattern pattern = AbstractStepDefinition.createPattern(TagSteps.find(language, action));
                 if (pattern != null && new Perl5Matcher().contains(step, pattern))
                     return true;

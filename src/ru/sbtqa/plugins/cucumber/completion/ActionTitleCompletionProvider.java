@@ -17,6 +17,7 @@ import org.jetbrains.plugins.cucumber.psi.impl.GherkinFileImpl;
 import org.jetbrains.plugins.cucumber.psi.impl.GherkinStepImpl;
 import org.jetbrains.plugins.cucumber.referencesearch.CucumberJavaUtil;
 import ru.sbtqa.plugins.cucumber.util.TagContext;
+import ru.sbtqa.plugins.cucumber.util.TagDefaultActions;
 import ru.sbtqa.plugins.cucumber.util.TagProject;
 
 import java.util.*;
@@ -46,11 +47,11 @@ public class ActionTitleCompletionProvider extends CompletionProvider<Completion
 
         TagContext tagContext = new TagContext(element);
         String[] starts = null;
-        if (localLanguage != null && ("en".equals(localLanguage) || "ru".equals(localLanguage)))
+        if (localLanguage != null && (TagProject.EN_LANGUAGE.equals(localLanguage) || TagProject.RU_LANGUAGE.equals(localLanguage)))
             starts = "en".equals(localLanguage) ? ENGLISH_KEYWORDS : RUSSIAN_KEYWORDS;
 
         if (stepName != null && starts != null && stepName.matches("(" + StringUtils.join(starts, "|") + ").*")) {
-            getVariations(element.getProject(), starts, tagContext.getCurrentPageName())
+            getVariations(element.getProject(), localLanguage, starts, tagContext.getCurrentPageName())
                     .filter(Objects::nonNull)
                     .forEach(x -> addActionTitle(x.replace("\\(", "("), resultSet));
             resultSet.stopHere();
@@ -65,22 +66,21 @@ public class ActionTitleCompletionProvider extends CompletionProvider<Completion
         resultSet.addElement(LookupElementBuilder.create(step).withInsertHandler(new CucumberCompletionContributor.StepInsertHandler(ranges)));
     }
 
-    private Stream<String> getVariations(Project project, String[] starts, String pageName) {
+    private Stream<String> getVariations(Project project, String language, String[] starts, String pageName) {
         List<String> result = new ArrayList<>();
         final PsiConstantEvaluationHelper evaluationHelper = JavaPsiFacade.getInstance(project).getConstantEvaluationHelper();
         TagProject.pages(project)
                 .filter(x -> pageName.equals(TagProject.findPageName(x, project)))
                 .map(TagProject::actionTitle)
-                .forEach(x ->
-                        x.forEach(pair -> { // Каждая аннотация ActionTitle
-                            Optional.ofNullable(CucumberJavaUtil.getAnnotationValue(pair.getFirst()))
-                                    .map(y -> evaluationHelper.computeConstantExpression(y, false))
-                                    .map(Object::toString)
-                                    .filter(y -> y.length() > 1)
-                                    .ifPresent(y -> Arrays.stream(starts).forEach(z -> result.add(z + y + ")" + StringUtils.repeat(" " + PATTERN_FOR_INSERTION, pair.getSecond()))));
-                        })
+                .forEach(x -> x.forEach(pair -> // Каждая аннотация ActionTitle
+                                Optional.ofNullable(CucumberJavaUtil.getAnnotationValue(pair.getFirst()))
+                                        .map(y -> evaluationHelper.computeConstantExpression(y, false))
+                                        .map(Object::toString)
+                                        .filter(y -> y.length() > 1)
+                                        .map(y -> TagDefaultActions.isDefaultAction(y, language) ? TagDefaultActions.find(language, y) : y)
+                                        .ifPresent(y -> Arrays.stream(starts).forEach(z -> result.add(z + y + ")" + StringUtils.repeat(" " + PATTERN_FOR_INSERTION, pair.getSecond()))))
+                        )
                 );
         return result.stream();
     }
-
 }
