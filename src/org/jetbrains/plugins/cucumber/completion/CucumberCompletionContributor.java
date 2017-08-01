@@ -215,18 +215,17 @@ public class CucumberCompletionContributor extends CompletionContributor {
     }
 
     private static void addStepDefinitions(CompletionResultSet result, PsiFile file) {
-        result = result.withPrefixMatcher(new CucumberPrefixMatcher(result.getPrefixMatcher().getPrefix()));
+        CompletionResultSet completionResultSet = result.withPrefixMatcher(new CucumberPrefixMatcher(result.getPrefixMatcher().getPrefix()));
         final List<AbstractStepDefinition> definitions = CucumberStepsIndex.getInstance(file.getProject()).getAllStepDefinitions(file);
         for (AbstractStepDefinition definition : definitions) {
             String text = definition.getCucumberRegex();
             String language = file instanceof GherkinFile ? ((GherkinFile) file).getLocaleLanguage() : null;
-            // вставил автодополнение
             text = TagSteps.find(language, text);
             if (text == null)
                 text = definition.getCucumberRegex();
+            System.out.println(text);
             if (text != null) {
-                List<String> variations = parseArgsIntoBrackets(text);
-                for (String stepSuggestion : variations) {
+                parseVariationsIntoBrackets(text).forEach(stepSuggestion -> {
                     // trim regexp line start/end markers
                     stepSuggestion = StringUtil.trimStart(stepSuggestion, "^");
                     stepSuggestion = StringUtil.trimEnd(stepSuggestion, "$");
@@ -257,14 +256,14 @@ public class CucumberCompletionContributor extends CompletionContributor {
                     final LookupElementBuilder lookup = element != null
                             ? LookupElementBuilder.create(element, stepSuggestion).bold()
                             : LookupElementBuilder.create(stepSuggestion);
-                    result.addElement(lookup.withInsertHandler(new StepInsertHandler(ranges)));
+                    completionResultSet.addElement(lookup.withInsertHandler(new StepInsertHandler(ranges)));
 
-                }
+                });
             }
         }
     }
 
-    private static List<String> parseArgsIntoBrackets(String step) {
+    private static List<String> parseVariationsIntoBrackets(String step) {
         List<Pair<String, List<String>>> insertions = new ArrayList<>();
         Matcher m = MULTY_SAMPLE_PATTERN.matcher(step);
         String mainSample = step;
@@ -282,6 +281,7 @@ public class CucumberCompletionContributor extends CompletionContributor {
         int[] pArray = new int[sampleCounts.length];
         for (int i = 0; i < sampleCounts.length; i++)
             pArray[i] = 1;
+        indexes.add(pArray);
         while (!Arrays.equals(sampleCounts, pArray)) {
             int[] t = Arrays.copyOf(pArray, pArray.length);
             for (int i = sampleCounts.length - 1; i >= 0; i--) {
